@@ -1,0 +1,35 @@
+# Entornos virtuales de Python
+.venv/
+venv/
+env/
+ENV/
+
+# Caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+
+# Node.js / Vite Frontend
+node_modules/
+dist/
+.vite/
+
+# Archivos generados por el usuario (audios WAV, proyectos locales, ZIPs)
+outputs/
+*.zip
+
+# Archivos de sistema y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+
+# Variables de entorno locales (secretos)
+.env
+.env.local
+
+# Descomenta la siguiente línea si NO quieres subir tus archivos .wav de voces clonadas a GitHub
+# voices/*.wav

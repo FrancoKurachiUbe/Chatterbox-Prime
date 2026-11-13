@@ -1,0 +1,1939 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatterbox Prime — AI Narration Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #080a0f;
+      --panel-bg: #0e121a;
+      --card-bg: #121722;
+      --card-border: #1b2333;
+      --card-hover: #171f2e;
+      --cyan: #06b6d4;
+      --cyan-hover: #0891b2;
+      --cyan-glow: rgba(6, 182, 212, 0.18);
+      --amber: #f59e0b;
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.2);
+      --rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HEADER */
+    header {
+      background: rgba(14, 18, 26, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 0.85rem 1.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .brand-icon {
+      background: linear-gradient(135deg, #0284c7, #06b6d4);
+      width: 40px;
+      height: 40px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      box-shadow: 0 0 16px var(--cyan-glow);
+    }
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+    .brand-subtitle {
+      font-size: 0.7rem;
+      color: var(--cyan);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .btn-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+      transition: all 0.15s ease;
+      background: var(--panel-bg);
+    }
+    .btn-link:hover {
+      background: var(--card-hover);
+      color: #fff;
+      border-color: var(--cyan);
+    }
+
+    /* MAIN CONTAINER - FULL WIDTH STUDIO */
+    main {
+      flex: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* CARDS */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+    .card-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-main);
+    }
+    .card-title .icon {
+      color: var(--cyan);
+      margin-right: 0.4rem;
+    }
+
+    /* 1. EDITOR FULL-WIDTH */
+    textarea {
+      width: 100%;
+      height: 190px;
+      background: #090c12;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      color: var(--text-main);
+      padding: 0.9rem 1rem;
+      font-family: inherit;
+      font-size: 0.92rem;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+    textarea:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 2px var(--cyan-glow);
+    }
+    .editor-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* 2. PARAMETERS & CONFIG BAR */
+    .config-bar {
+      display: grid;
+      grid-template-columns: 200px 140px 1fr 2fr;
+      gap: 1rem;
+      align-items: end;
+    }
+    @media (max-width: 1100px) {
+      .config-bar { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 700px) {
+      .config-bar { grid-template-columns: 1fr; }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .form-group label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+    .form-group label span.val {
+      color: var(--cyan);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    select, input[type="text"], input[type="number"] {
+      background: #090c12;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 0.55rem 0.75rem;
+      border-radius: 7px;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.15s ease;
+      width: 100%;
+    }
+    select:focus, input:focus { border-color: var(--cyan); }
+    input[type="range"] {
+      accent-color: var(--cyan);
+      height: 5px;
+      border-radius: 5px;
+      background: #1b2333;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    /* MODE TOGGLE (PÁRRAFOS / ESCENAS) */
+    .segmented-control {
+      display: flex;
+      background: #090c12;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 3px;
+    }
+    .segmented-btn {
+      flex: 1;
+      padding: 0.45rem 0.65rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border: none;
+      background: transparent;
+      color: var(--text-dim);
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      transition: all 0.15s ease;
+    }
+    .segmented-btn.active {
+      background: #182233;
+      color: #fff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    }
+    .segmented-btn.active.scene {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(6, 182, 212, 0.1));
+      color: var(--cyan);
+      border: 1px solid rgba(6, 182, 212, 0.35);
+    }
+
+    /* SLIDERS GRID */
+    .sliders-inline {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+    }
+    @media (max-width: 900px) {
+      .sliders-inline { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* 3. GENERATION ACTION BAR */
+    .action-bar {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    .btn-generate {
+      flex: 1;
+      background: linear-gradient(135deg, #0284c7, #06b6d4);
+      color: #04080e;
+      font-weight: 800;
+      font-size: 0.95rem;
+      padding: 0.85rem 1.5rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.15s ease;
+      box-shadow: 0 4px 18px var(--cyan-glow);
+    }
+    .btn-generate:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+    .btn-generate:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-cancel {
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      color: #fb7185;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 0.85rem 1.25rem;
+      border-radius: 8px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+    }
+    .btn-cancel:hover {
+      background: rgba(244, 63, 94, 0.25);
+    }
+
+    .btn-secondary {
+      background: #141c29;
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 0.78rem;
+      padding: 0.5rem 0.85rem;
+      border-radius: 7px;
+      border: 1px solid var(--card-border);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-secondary:hover {
+      background: var(--card-hover);
+      border-color: var(--cyan);
+      color: #fff;
+    }
+    .btn-secondary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      border-color: var(--card-border);
+    }
+    .generating-pulse {
+      border-color: #f59e0b !important;
+      background: rgba(245, 158, 11, 0.08) !important;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.15) !important;
+      animation: queuePulse 1.5s infinite;
+    }
+    @keyframes queuePulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.65; }
+    }
+    .btn-sm {
+      padding: 0.32rem 0.65rem;
+      font-size: 0.72rem;
+      border-radius: 6px;
+    }
+
+    /* 4. SUMMARY METRICS BAR */
+    .metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.75rem;
+    }
+    @media (max-width: 900px) {
+      .metrics-bar { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 500px) {
+      .metrics-bar { grid-template-columns: repeat(2, 1fr); }
+    }
+    .metric-card {
+      background: #0b0f17;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 0.65rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .metric-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-dim);
+    }
+    .metric-val {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .metric-val.cyan { color: var(--cyan); }
+    .metric-val.green { color: var(--emerald); }
+    .metric-val.amber { color: var(--amber); }
+    .metric-val.rose { color: var(--rose); }
+
+    /* PROGRESS BAR */
+    .progress-box {
+      background: #090c12;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .progress-bar-bg {
+      background: #141c28;
+      height: 7px;
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      background: linear-gradient(90deg, #0284c7, #06b6d4, #10b981);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* MASTER AUDIO PLAYER */
+    .master-banner {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(16, 185, 129, 0.05));
+      border: 1px solid rgba(6, 182, 212, 0.35);
+      border-radius: 10px;
+      padding: 0.9rem 1.25rem;
+      display: none;
+      align-items: center;
+      gap: 1.25rem;
+    }
+    @media (max-width: 800px) {
+      .master-banner { flex-direction: column; align-items: stretch; }
+    }
+
+    /* PRODUCTION PANEL */
+    .production-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--card-border);
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .production-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* SECTIONS & PARTS */
+    .sections-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin-top: 0.5rem;
+    }
+    .section-group {
+      background: #0c1017;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .section-group-header {
+      background: #101622;
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #182233;
+    }
+    .section-group-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .parts-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 0.75rem;
+    }
+
+    .part-row {
+      background: #0f141f;
+      border: 1px solid #182233;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      transition: all 0.2s ease;
+    }
+    .part-row:hover { border-color: #243248; }
+    .part-row.ready { border-left: 3px solid var(--emerald); }
+    .part-row.generating-pulse {
+      border: 1px solid var(--amber) !important;
+      background: linear-gradient(90deg, rgba(245, 158, 11, 0.15), #0f141f) !important;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
+    }
+    .part-row.queued-style {
+      border: 1px solid var(--cyan) !important;
+      background: linear-gradient(90deg, rgba(6, 182, 212, 0.1), #0f141f) !important;
+    }
+    .part-row.just-finished {
+      border: 1px solid var(--emerald) !important;
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.2), #0f141f) !important;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .part-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .part-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .part-chars {
+      font-size: 0.68rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-dim);
+    }
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      width: fit-content;
+    }
+    .badge-status.ready { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .badge-status.pending { background: #182233; color: var(--text-dim); }
+    .badge-status.generating { background: rgba(6, 182, 212, 0.2); color: var(--cyan); }
+    .badge-status.error { background: rgba(244, 63, 94, 0.2); color: #fb7185; }
+
+    .part-text-preview {
+      font-size: 0.83rem;
+      line-height: 1.45;
+      color: var(--text-muted);
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .part-player audio {
+      width: 100%;
+      height: 32px;
+      outline: none;
+    }
+    .part-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    /* SCENE-LEVEL PLAY & REGENERATE BUTTONS */
+    .btn-play-scene {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #04080e;
+      font-weight: 800;
+      font-size: 0.84rem;
+      padding: 0.45rem 1.15rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+      box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+    }
+    .btn-play-scene:hover {
+      filter: brightness(1.15);
+      transform: translateY(-1px);
+    }
+    .btn-regen-scene {
+      background: #151d2a;
+      color: #38bdf8;
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 0.45rem 0.95rem;
+      border-radius: 8px;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+    }
+    .btn-regen-scene:hover {
+      background: #1f2b3e;
+      border-color: #38bdf8;
+      color: #fff;
+    }
+    .btn-regen-scene:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* MODAL ADMINISTRAR VOCES */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal-box {
+      background: #0f141f;
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      width: 90%;
+      max-width: 580px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 0.75rem;
+    }
+    .modal-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .voice-list-scroll {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+    .voice-item {
+      background: #141c28;
+      border: 1px solid #1d273a;
+      border-radius: 8px;
+      padding: 0.65rem 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #141c28;
+      border: 1px solid var(--cyan);
+      color: #fff;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      z-index: 110;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <div class="brand-title">CHATTERBOX PRIME</div>
+        <div class="brand-subtitle">AI Narration Studio</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button id="btn-open-voices" class="btn-secondary btn-sm">🎙️ Administrar Voces</button>
+      <a href="/gradio" target="_blank" class="btn-link">Vista Gradio</a>
+    </div>
+  </header>
+
+  <!-- MAIN STUDIO -->
+  <main>
+
+    <!-- 1. GUION FULL-WIDTH -->
+    <div class="card">
+      <div class="card-title">
+        <span><span class="icon">📝</span> 1. Editor de Guion</span>
+        <button id="btn-auto-split" class="btn-secondary btn-sm" title="Divide en bloques que no superen ~250 caracteres">
+          ⚡ Optimizar en Bloques (~250 chars)
+        </button>
+      </div>
+
+      <textarea id="script-input" placeholder="Escribe o pega aquí tu guion...
+En modo Escenas:
+ESCENA 1 — El Gran Despertar
+En el corazón de la antigua Europa, el año 1492 marcó el inicio de una era que transformaría el destino de 500 naciones.
+
+ESCENA 2 — La Tempestad en Altamar
+Durante 40 días y 40 noches, los vientos del Atlántico pusieron a prueba el temple de más de 90 tripulantes.
+
+En modo Párrafos:
+Separa cada sección dejando una línea en blanco."></textarea>
+
+      <div class="editor-stats">
+        <span id="stat-words">0 palabras</span>
+        <span id="stat-chars">0 caracteres</span>
+        <span id="stat-sections">0 secciones detectadas</span>
+        <span id="autosave-status" style="color: var(--emerald);">💾 Autosave activado</span>
+      </div>
+    </div>
+
+    <!-- 2. MODO, IDIOMA, VOZ Y PARÁMETROS -->
+    <div class="card">
+      <div class="card-title">
+        <span><span class="icon">⚙️</span> 2. Modo, Voz y Parámetros</span>
+        <button id="btn-reset-params" class="btn-secondary btn-sm">Restaurar Valores por Defecto</button>
+      </div>
+
+      <div class="config-bar">
+
+        <!-- Selector de Modo: Párrafos / Escenas -->
+        <div class="form-group">
+          <label>Modo de Trabajo</label>
+          <div class="segmented-control">
+            <button id="mode-paragraph" class="segmented-btn">📄 Párrafos</button>
+            <button id="mode-scene" class="segmented-btn active scene">🎬 Escenas</button>
+          </div>
+        </div>
+
+        <!-- Idioma -->
+        <div class="form-group">
+          <label>Idioma</label>
+          <select id="lang-select">
+            <option value="es" selected>Español (es)</option>
+            <option value="en">Inglés (en)</option>
+            <option value="fr">Francés (fr)</option>
+            <option value="de">Alemán (de)</option>
+            <option value="it">Italiano (it)</option>
+            <option value="pt">Portugués (pt)</option>
+          </select>
+        </div>
+
+        <!-- Selector de Voz -->
+        <div class="form-group">
+          <label>Voz de Clonación (WAV)</label>
+          <div style="display: flex; gap: 0.35rem;">
+            <select id="voice-select"></select>
+            <button id="btn-voice-preview" class="btn-secondary btn-sm" title="Escuchar voz">▶️</button>
+          </div>
+        </div>
+
+        <!-- Sliders de Parámetros Chatterbox Prime -->
+        <div class="sliders-inline">
+          <!-- Exaggeration -->
+          <div class="form-group">
+            <label>Énfasis <span class="val" id="val-exaggeration">0.35</span></label>
+            <input type="range" id="param-exaggeration" min="0.0" max="1.0" step="0.01" value="0.35">
+          </div>
+
+          <!-- Temperature -->
+          <div class="form-group">
+            <label>Temp <span class="val" id="val-temperature">0.55</span></label>
+            <input type="range" id="param-temperature" min="0.1" max="1.0" step="0.01" value="0.55">
+          </div>
+
+          <!-- CFG Weight -->
+          <div class="form-group">
+            <label>CFG <span class="val" id="val-cfg">0.50</span></label>
+            <input type="range" id="param-cfg" min="0.1" max="1.0" step="0.05" value="0.50">
+          </div>
+
+          <!-- Seed Fijo -->
+          <div class="form-group">
+            <label>Seed (Fijo) <button id="btn-rand-seed" class="btn-secondary btn-sm" style="padding: 0 4px; font-size: 0.65rem;">🎲</button></label>
+            <input type="number" id="param-seed" value="737219296">
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 3. ACCIÓN PRINCIPAL: GENERAR AUDIO -->
+    <div class="action-bar">
+      <button id="btn-generate-main" class="btn-generate">
+        🎙️ GENERAR AUDIO
+      </button>
+      <button id="btn-cancel-main" class="btn-cancel">
+        🛑 Cancelar Generación
+      </button>
+    </div>
+
+    <!-- 4. RESUMEN DE MÉTRICAS -->
+    <div class="metrics-bar">
+      <div class="metric-card">
+        <span class="metric-label" id="metric-mode-label">Escenas</span>
+        <span class="metric-val" id="count-sections">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Partes Totales</span>
+        <span class="metric-val" id="count-total-parts">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Generadas</span>
+        <span class="metric-val green" id="count-ready-parts">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Pendientes</span>
+        <span class="metric-val amber" id="count-pending-parts">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Errores</span>
+        <span class="metric-val rose" id="count-error-parts">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Progreso</span>
+        <span class="metric-val cyan" id="count-percent">0%</span>
+      </div>
+    </div>
+
+    <!-- BARRA DE PROGRESO DE GENERACIÓN -->
+    <div id="progress-container" class="progress-box" style="display: none;">
+      <div class="progress-header">
+        <span id="progress-step-desc">Iniciando síntesis...</span>
+        <span id="progress-step-percent" style="color: var(--cyan); font-family: 'JetBrains Mono', monospace;">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div id="progress-fill" class="progress-bar-fill"></div>
+      </div>
+    </div>
+
+    <!-- MASTER AUDIO PLAYER BANNER -->
+    <div id="master-banner" class="master-banner">
+      <div style="flex: 1;">
+        <div style="font-size: 0.85rem; font-weight: 800; color: #38bdf8;">🏆 AUDIO COMPLETO UNIDO (MASTER WAV)</div>
+        <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">Todas las escenas concatenadas sin pérdida de calidad.</div>
+      </div>
+      <audio id="master-audio" controls style="flex: 2; height: 34px;"></audio>
+      <a id="btn-master-download" class="btn-secondary btn-sm" download="Master_Chatterbox_Prime.wav">⬇️ Descargar WAV</a>
+    </div>
+
+    <!-- 5. PANEL DE PRODUCCIÓN -->
+    <div class="card" style="flex: 1;">
+      <div class="production-header">
+        <div class="card-title">
+          <span><span class="icon">📑</span> Panel de Producción y Control de Audio</span>
+        </div>
+
+        <div class="production-actions">
+          <button id="btn-regen-selected" class="btn-secondary btn-sm" disabled>
+            🔄 Regenerar seleccionadas (<span id="sel-count">0</span>)
+          </button>
+          <button id="btn-join-all" class="btn-secondary btn-sm" title="Concatena todas las partes generadas en un solo archivo WAV maestro">
+            🔗 Unir Todo (Master WAV)
+          </button>
+          <button id="btn-copy-yt" class="btn-secondary btn-sm" title="Copia marcas de tiempo para YouTube">
+            📋 Marcas YouTube
+          </button>
+          <button id="btn-refresh" class="btn-secondary btn-sm">🔄 Refrescar</button>
+        </div>
+      </div>
+
+      <!-- BARRA DE ACCIÓN: REGENERAR SELECCIONADAS, ABRIR CARPETA Y BORRAR WAV -->
+      <div style="background: linear-gradient(90deg, #0d1524, #0f1828); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 8px; padding: 0.75rem 1rem; margin: 0.75rem 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+          <button id="btn-regen-selected-main" class="btn-primary" style="padding: 0.45rem 1rem; font-size: 0.8rem; font-weight: 800; background: linear-gradient(90deg, #f59e0b, #d97706); color: #000; cursor: pointer;" disabled onclick="document.getElementById('btn-regen-selected').click()">
+            🔄 Regenerar partes seleccionadas (<span id="sel-count-main">0</span>)
+          </button>
+          <button id="btn-open-folder" class="btn-secondary btn-sm" onclick="openOutputsModal()" title="Abrir carpeta con todos los archivos WAV generados">
+            📂 Abrir carpeta de audios
+          </button>
+          <button id="btn-delete-all-wavs" class="btn-secondary btn-sm" style="color: #fb7185; border-color: rgba(244, 63, 94, 0.35);" onclick="deleteAllWavsHtml()" title="Eliminar todos los archivos WAV generados">
+            🗑️ Borrar todos los WAV
+          </button>
+        </div>
+        <div>
+          <button id="btn-download-all-zip" class="btn-secondary btn-sm" style="color: #34d399; border-color: rgba(16, 185, 129, 0.4);" onclick="downloadAllZipHtml()" title="Descargar todos los audios en un archivo ZIP">
+            📦 Descargar todos (ZIP)
+          </button>
+        </div>
+      </div>
+
+      <!-- LISTADO DE SECCIONES Y PARTES -->
+      <div id="sections-container" class="sections-container">
+        <div style="text-align: center; color: var(--text-dim); padding: 3rem 1rem; font-size: 0.85rem;">
+          Pega tu guion arriba y pulsa <b>"GENERAR AUDIO"</b> para estructurar y producir las escenas.
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL: ADMINISTRAR VOCES -->
+  <div id="modal-voices" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">🎙️ Administrar Voces (Clonación WAV)</div>
+        <button id="btn-close-voices" class="btn-secondary btn-sm">✕</button>
+      </div>
+
+      <!-- Formulario para agregar voz -->
+      <div style="background: #090c12; border: 1px solid var(--card-border); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+        <div style="font-size: 0.8rem; font-weight: 700; color: var(--cyan);">➕ Agregar Nueva Voz</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <input type="text" id="new-voice-name" placeholder="Nombre de la voz (ej: Brian Epico)">
+          <input type="file" id="new-voice-file" accept=".wav,audio/wav">
+        </div>
+        <button id="btn-upload-voice" class="btn-secondary" style="justify-content: center; background: #0284c7; color: #fff;">
+          Subir y Guardar en voices/
+        </button>
+      </div>
+
+      <!-- Listado de voces existentes -->
+      <div>
+        <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.5rem;">
+          Voces Disponibles
+        </div>
+        <div id="voice-items-container" class="voice-list-scroll"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CARPETA DE AUDIOS GENERADOS (/outputs) -->
+  <div id="modal-outputs" class="modal-overlay">
+    <div class="modal-box" style="max-width: 750px;">
+      <div class="modal-header">
+        <div class="modal-title">📂 Carpeta de Audios Generados (/outputs/)</div>
+        <button onclick="closeOutputsModal()" class="btn-secondary btn-sm">✕</button>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+        <div id="outputs-stats" style="font-size: 0.8rem; color: var(--text-muted);">
+          Cargando archivos...
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn-secondary btn-sm" style="color: #34d399;" onclick="downloadAllZipHtml()">
+            📦 Descargar ZIP
+          </button>
+          <button class="btn-secondary btn-sm" style="color: #fb7185;" onclick="deleteAllWavsHtml()">
+            🗑️ Borrar todos los WAV
+          </button>
+        </div>
+      </div>
+
+      <div id="outputs-files-container" class="voice-list-scroll" style="max-height: 50vh;">
+        <div style="text-align: center; color: var(--text-dim); padding: 2rem;">Cargando lista de audios...</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Notificación</div>
+
+  <!-- CLIENT-SIDE APP LOGIC -->
+  <script>
+    let currentMode = "scene";
+    let currentProject = null;
+    let pollInterval = null;
+    let selectedParts = new Set(); // formato: "secNum-partNum"
+    let autosaveTimeout = null;
+
+    // Elementos UI
+    const scriptInput = document.getElementById('script-input');
+    const modeParagraphBtn = document.getElementById('mode-paragraph');
+    const modeSceneBtn = document.getElementById('mode-scene');
+    const langSelect = document.getElementById('lang-select');
+    const voiceSelect = document.getElementById('voice-select');
+    const btnGenerateMain = document.getElementById('btn-generate-main');
+    const btnCancelMain = document.getElementById('btn-cancel-main');
+    const btnRegenSelected = document.getElementById('btn-regen-selected');
+    const toast = document.getElementById('toast');
+
+    function showToast(msg) {
+      toast.innerText = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3500);
+    }
+
+    // Modo selector
+    modeParagraphBtn.addEventListener('click', () => setMode('paragraph'));
+    modeSceneBtn.addEventListener('click', () => setMode('scene'));
+
+    function setMode(mode) {
+      currentMode = mode;
+      if (mode === 'paragraph') {
+        modeParagraphBtn.className = 'segmented-btn active';
+        modeSceneBtn.className = 'segmented-btn';
+        document.getElementById('metric-mode-label').innerText = 'Párrafos';
+      } else {
+        modeSceneBtn.className = 'segmented-btn active scene';
+        modeParagraphBtn.className = 'segmented-btn';
+        document.getElementById('metric-mode-label').innerText = 'Escenas';
+      }
+      updateStats();
+      loadProject();
+      triggerAutosave();
+    }
+
+    // Sliders reactivos
+    ['exaggeration', 'temperature', 'cfg'].forEach(p => {
+      const slider = document.getElementById(`param-${p}`);
+      const val = document.getElementById(`val-${p}`);
+      slider.addEventListener('input', () => {
+        val.innerText = parseFloat(slider.value).toFixed(2);
+        triggerAutosave();
+      });
+    });
+
+    document.getElementById('param-seed').addEventListener('input', triggerAutosave);
+    document.getElementById('btn-rand-seed').addEventListener('click', () => {
+      document.getElementById('param-seed').value = Math.floor(Math.random() * 1000000000);
+      triggerAutosave();
+    });
+
+    document.getElementById('btn-reset-params').addEventListener('click', () => {
+      document.getElementById('param-exaggeration').value = 0.35;
+      document.getElementById('val-exaggeration').innerText = '0.35';
+      document.getElementById('param-temperature').value = 0.55;
+      document.getElementById('val-temperature').innerText = '0.55';
+      document.getElementById('param-cfg').value = 0.50;
+      document.getElementById('val-cfg').innerText = '0.50';
+      document.getElementById('param-seed').value = 737219296;
+      showToast('Parámetros por defecto restaurados.');
+      triggerAutosave();
+    });
+
+    // Contador y Autosave del Guion
+    scriptInput.addEventListener('input', () => {
+      updateStats();
+      triggerAutosave();
+    });
+
+    function updateStats() {
+      const txt = scriptInput.value || '';
+      document.getElementById('stat-chars').innerText = `${txt.length} caracteres`;
+      const words = txt.trim() ? txt.trim().split(/\s+/).length : 0;
+      document.getElementById('stat-words').innerText = `${words} palabras`;
+
+      let sections = 0;
+      if (currentMode === 'scene') {
+        sections = (txt.match(/^\s*(?:ESCENA|Escena|SCENE|Scene|CAPÍTULO|Capítulo)\s+\d+/gim) || []).length || (txt.trim() ? 1 : 0);
+      } else {
+        sections = (txt.trim() ? txt.trim().split(/\n\s*\n/).length : 0);
+      }
+      document.getElementById('stat-sections').innerText = `${sections} ${currentMode === 'scene' ? 'escenas' : 'párrafos'}`;
+    }
+
+    function triggerAutosave() {
+      document.getElementById('autosave-status').innerText = '💾 Guardando...';
+      if (autosaveTimeout) clearTimeout(autosaveTimeout);
+      autosaveTimeout = setTimeout(saveProjectSettings, 800);
+    }
+
+    async function saveProjectSettings() {
+      const text = scriptInput.value.trim();
+      if (!text) {
+        document.getElementById('autosave-status').innerText = '💾 Autosave listo';
+        return;
+      }
+      try {
+        await fetch('/api/project', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: text,
+            processing_mode: currentMode,
+            language: langSelect.value,
+            voice_name: voiceSelect.value,
+            exaggeration: parseFloat(document.getElementById('param-exaggeration').value),
+            temperature: parseFloat(document.getElementById('param-temperature').value),
+            cfg_weight: parseFloat(document.getElementById('param-cfg').value),
+            seed: parseInt(document.getElementById('param-seed').value) || 737219296
+          })
+        });
+        document.getElementById('autosave-status').innerText = '💾 Guardado';
+      } catch (e) {
+        document.getElementById('autosave-status').innerText = '⚠️ Error autosave';
+      }
+    }
+
+    // Dividir en Bloques de ~250 Caracteres
+    document.getElementById('btn-auto-split').addEventListener('click', () => {
+      const rawText = scriptInput.value.trim();
+      if (!rawText) return;
+
+      const paragraphs = rawText.split(/\n\s*\n/);
+      let chunks = [];
+      let counter = 1;
+
+      for (let p of paragraphs) {
+        let cleanP = p.replace(/^ESCENA\s+\d+[:\s—-]*/i, '').trim();
+        if (!cleanP) continue;
+
+        if (cleanP.length <= 250) {
+          if (currentMode === 'scene') chunks.push(`ESCENA ${counter} — Escena ${counter}\n${cleanP}`);
+          else chunks.push(cleanP);
+          counter++;
+        } else {
+          const sentences = cleanP.match(/[^.!?;\n]+(?:[.!?;\n]+|$)/g) || [cleanP];
+          let currentChunk = "";
+          for (let s of sentences) {
+            s = s.trim();
+            if (!s) continue;
+            if ((currentChunk + " " + s).trim().length <= 250) {
+              currentChunk = (currentChunk + " " + s).trim();
+            } else {
+              if (currentChunk) {
+                if (currentMode === 'scene') chunks.push(`ESCENA ${counter} — Parte ${counter}\n${currentChunk}`);
+                else chunks.push(currentChunk);
+                counter++;
+              }
+              currentChunk = s;
+            }
+          }
+          if (currentChunk) {
+            if (currentMode === 'scene') chunks.push(`ESCENA ${counter} — Parte ${counter}\n${currentChunk}`);
+            else chunks.push(currentChunk);
+            counter++;
+          }
+        }
+      }
+
+      scriptInput.value = chunks.join('\n\n');
+      updateStats();
+      triggerAutosave();
+      showToast('⚡ Guion estructurado en bloques de ~250 caracteres.');
+    });
+
+    // Cargar Voces
+    async function loadVoices() {
+      try {
+        const res = await fetch('/api/voices');
+        if (!res.ok) return;
+        const data = await res.json();
+        voiceSelect.innerHTML = '';
+        data.voices.forEach(v => {
+          const opt = document.createElement('option');
+          opt.value = v.name;
+          opt.innerText = v.name + (v.is_default ? ' (Principal)' : '');
+          if (v.name === data.default_voice) opt.selected = true;
+          voiceSelect.appendChild(opt);
+        });
+        renderVoiceManagerList(data.voices);
+      } catch (e) {}
+    }
+
+    function renderVoiceManagerList(voices) {
+      const container = document.getElementById('voice-items-container');
+      if (!voices || voices.length === 0) {
+        container.innerHTML = '<div style="color: var(--text-dim); text-align: center; padding: 1rem;">No hay voces en voices/. Sube una arriba.</div>';
+        return;
+      }
+      container.innerHTML = voices.map(v => `
+        <div class="voice-item">
+          <div>
+            <div style="font-size: 0.85rem; font-weight: 700; color: #fff;">${v.name}</div>
+            <div style="font-size: 0.7rem; color: var(--text-dim);">${v.size_kb} KB &bull; ${v.filename}</div>
+          </div>
+          <div style="display: flex; gap: 0.4rem;">
+            <button class="btn-secondary btn-sm" onclick="playVoicePreview('${v.name}')">▶️</button>
+            <button class="btn-secondary btn-sm" style="color: var(--rose);" onclick="deleteVoice('${v.name}')">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.playVoicePreview = function(name) {
+      const audio = new Audio(`/api/voices/${encodeURIComponent(name)}.wav/preview?t=${Date.now()}`);
+      audio.play().catch(e => showToast('Error al reproducir audio de voz: ' + e));
+    };
+
+    document.getElementById('btn-voice-preview').addEventListener('click', () => {
+      playVoicePreview(voiceSelect.value);
+    });
+
+    window.deleteVoice = async function(name) {
+      if (!confirm(`¿Eliminar la voz "${name}" de la carpeta voices/?`)) return;
+      try {
+        const res = await fetch(`/api/voices/${encodeURIComponent(name)}`, { method: 'DELETE' });
+        if (res.ok) {
+          showToast(`Voz "${name}" eliminada.`);
+          loadVoices();
+        } else {
+          showToast('Error al eliminar voz.');
+        }
+      } catch (e) {
+        showToast('Error de red al eliminar: ' + e);
+      }
+    };
+
+    // Subir voz
+    document.getElementById('btn-upload-voice').addEventListener('click', async () => {
+      const fileInput = document.getElementById('new-voice-file');
+      const nameInput = document.getElementById('new-voice-name');
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert('Por favor selecciona un archivo de audio WAV.');
+        return;
+      }
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+      if (nameInput.value.trim()) formData.append('name', nameInput.value.trim());
+
+      try {
+        const res = await fetch('/api/voices/upload', {
+          method: 'POST',
+          body: formData
+        });
+        if (res.ok) {
+          showToast('✅ Voz guardada exitosamente en voices/');
+          nameInput.value = '';
+          fileInput.value = '';
+          loadVoices();
+        } else {
+          showToast('Error al subir la voz.');
+        }
+      } catch (e) {
+        showToast('Error: ' + e);
+      }
+    });
+
+    // Modal abrir / cerrar
+    document.getElementById('btn-open-voices').addEventListener('click', () => {
+      document.getElementById('modal-voices').style.display = 'flex';
+      loadVoices();
+    });
+    document.getElementById('btn-close-voices').addEventListener('click', () => {
+      document.getElementById('modal-voices').style.display = 'none';
+    });
+
+    // Cargar Proyecto y Renderizar Producción
+    async function loadProject() {
+      try {
+        const res = await fetch(`/api/project?mode=${currentMode}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        currentProject = data;
+
+        if (data.project) {
+          if (!scriptInput.value && data.project.last_script) {
+            scriptInput.value = data.project.last_script;
+            updateStats();
+          }
+          if (data.project.settings) {
+            const s = data.project.settings;
+            if (s.exaggeration) {
+              document.getElementById('param-exaggeration').value = s.exaggeration;
+              document.getElementById('val-exaggeration').innerText = s.exaggeration;
+            }
+            if (s.temperature) {
+              document.getElementById('param-temperature').value = s.temperature;
+              document.getElementById('val-temperature').innerText = s.temperature;
+            }
+            if (s.cfg_weight) {
+              document.getElementById('param-cfg').value = s.cfg_weight;
+              document.getElementById('val-cfg').innerText = s.cfg_weight;
+            }
+            if (s.seed) document.getElementById('param-seed').value = s.seed;
+          }
+        }
+
+        renderMetrics(data.summary || {});
+        renderProductionPanel(data.panel || []);
+      } catch (e) {}
+    }
+
+    function renderMetrics(s) {
+      document.getElementById('count-sections').innerText = s.total_sections || 0;
+      document.getElementById('count-total-parts').innerText = s.total_parts || 0;
+      document.getElementById('count-ready-parts').innerText = s.ready_parts || 0;
+      document.getElementById('count-pending-parts').innerText = s.pending_parts || 0;
+      document.getElementById('count-error-parts').innerText = s.errors_count || 0;
+      document.getElementById('count-percent').innerText = `${s.percent || 0}%`;
+
+      if (s.is_generating) {
+        startPolling();
+      }
+    }
+
+    function renderProductionPanel(panel) {
+      const container = document.getElementById('sections-container');
+      if (!panel || panel.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; color: var(--text-dim); padding: 3rem 1rem; font-size: 0.85rem;">
+            Pega tu guion arriba y pulsa <b>"GENERAR AUDIO"</b> para estructurar y producir las escenas.
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = panel.map(sec => {
+        const secLabel = currentMode === 'scene' ? 'Escena' : 'Párrafo';
+        const hasAudio = Boolean(sec.has_audio || sec.audio_url || sec.has_joined);
+        const finalUrl = sec.audio_url || sec.joined_audio_url;
+        const finalWavName = sec.joined_filename || `${secLabel}_${String(sec.number).padStart(3, '0')}.wav`;
+
+        return `
+          <div class="section-group" id="sec-group-${sec.number}">
+            <div class="section-group-header">
+              <div class="section-group-title">
+                <span>${currentMode === 'scene' ? '🎬' : '📄'} ${sec.title || (secLabel + ' ' + sec.number)}</span>
+                <span class="badge-status ${hasAudio ? 'ready' : 'pending'}" id="status-sec-${sec.number}">
+                  ${hasAudio ? 'Listo' : 'Pendiente'}
+                </span>
+                <span style="font-size: 0.72rem; color: var(--text-dim);">(${sec.parts.length} partes)</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                ${hasAudio ? `
+                  <button class="btn-play-scene" id="btn-play-sec-${sec.number}" onclick="togglePlayScene(${sec.number})">
+                    ▶️ Play
+                  </button>
+                  <audio id="audio-sec-${sec.number}" controls src="${finalUrl}?t=${Date.now()}" style="height: 28px; width: 180px;" onplay="updateScenePlayBtn(${sec.number}, true)" onpause="updateScenePlayBtn(${sec.number}, false)" onended="updateScenePlayBtn(${sec.number}, false)"></audio>
+                  <a href="${finalUrl}" download="${finalWavName}" class="btn-secondary btn-sm" title="Descargar WAV de esta escena">⬇️ WAV</a>
+                ` : `
+                  <span style="font-size: 0.72rem; color: var(--text-dim); margin-right: 0.25rem;">Sin audio</span>
+                `}
+                <button class="btn-regen-scene" id="btn-regen-sec-${sec.number}" onclick="regenerateScene(${sec.number})" title="Regenera únicamente el audio de esta escena">
+                  🔄 Regenerar
+                </button>
+              </div>
+            </div>
+
+            <div class="parts-grid">
+              ${sec.parts.map(p => {
+                const partKey = `${sec.number}-${p.number}`;
+                const isChecked = selectedParts.has(partKey);
+                const charLen = (p.text || '').length;
+
+                return `
+                  <div class="part-row ${p.has_audio ? 'ready' : ''}" id="row-${partKey}">
+                    <div style="flex-shrink: 0;">
+                      <input type="checkbox" onchange="toggleSelectPart(${sec.number}, ${p.number}, this.checked)" ${isChecked ? 'checked' : ''} style="cursor: pointer; width: 16px; height: 16px;">
+                    </div>
+
+                    <div class="part-text-preview" style="flex: 1; font-size: 0.88rem; color: #f1f5f9; line-height: 1.5; padding: 0 0.5rem;" title="${escapeHtml(p.text || '')}">
+                      ${escapeHtml(p.text || '')}
+                    </div>
+
+                    <div class="part-status-badge" id="badge-${partKey}" style="display: none; flex-shrink: 0; font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 6px;"></div>
+
+                    <div class="part-actions" style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
+                      <button class="btn-play-scene" id="btn-play-part-${sec.number}-${p.number}" onclick="togglePlayPart(${sec.number}, ${p.number})" ${p.has_audio ? '' : 'disabled style="opacity: 0.4; cursor: not-allowed; padding: 0.35rem 0.85rem; font-size: 0.76rem;"'} style="padding: 0.35rem 0.85rem; font-size: 0.76rem;">
+                        ▶️ Play
+                      </button>
+                      <audio id="audio-part-${sec.number}-${p.number}" src="${p.audio_url || ''}" style="display: none;" onplay="updatePartPlayBtn(${sec.number}, ${p.number}, true)" onpause="updatePartPlayBtn(${sec.number}, ${p.number}, false)" onended="updatePartPlayBtn(${sec.number}, ${p.number}, false)"></audio>
+
+                      <button class="btn-secondary btn-sm" id="btn-regen-part-${sec.number}-${p.number}" onclick="regenerateSingle(${sec.number}, ${p.number})" title="Regenerar audio de esta parte">
+                        🔄 Regenerar
+                      </button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Selección múltiple
+    window.toggleSelectPart = function(secNum, partNum, checked) {
+      const key = `${secNum}-${partNum}`;
+      if (checked) selectedParts.add(key);
+      else selectedParts.delete(key);
+
+      document.getElementById('sel-count').innerText = selectedParts.size;
+      const mainCount = document.getElementById('sel-count-main');
+      if (mainCount) mainCount.innerText = selectedParts.size;
+      btnRegenSelected.disabled = selectedParts.size === 0;
+      const mainBtn = document.getElementById('btn-regen-selected-main');
+      if (mainBtn) mainBtn.disabled = selectedParts.size === 0;
+    };
+
+    // MODAL CARPETA DE AUDIOS GENERADOS
+    window.openOutputsModal = async function() {
+      const modal = document.getElementById('modal-outputs');
+      const stats = document.getElementById('outputs-stats');
+      const container = document.getElementById('outputs-files-container');
+      modal.style.display = 'flex';
+      stats.innerText = 'Cargando lista de audios...';
+
+      try {
+        const res = await fetch('/api/outputs');
+        if (!res.ok) throw new Error('Error al listar');
+        const data = await res.json();
+        stats.innerText = `${data.total_count} archivos WAV encontrados (${data.total_size_mb} MB) en ${data.folder_path}`;
+
+        if (!data.files || data.files.length === 0) {
+          container.innerHTML = '<div style="text-align: center; color: var(--text-dim); padding: 2rem;">No hay archivos WAV generados todavía.</div>';
+          return;
+        }
+
+        container.innerHTML = data.files.map(f => `
+          <div class="voice-item" style="display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0.8rem; background: #0f1624; border: 1px solid #1c2637; border-radius: 8px; margin-bottom: 0.4rem;">
+            <div>
+              <div style="font-size: 0.82rem; font-weight: 700; color: #fff; font-family: 'JetBrains Mono', monospace;">${f.name}</div>
+              <div style="font-size: 0.7rem; color: var(--text-dim);">
+                <span class="badge-status ${f.category === 'master' ? 'ready' : 'pending'}" style="font-size: 0.6rem; padding: 1px 4px;">${f.category}</span>
+                &bull; ${f.size_kb} KB
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.4rem; align-items: center;">
+              <audio controls src="${f.url}" style="height: 26px; width: 140px;"></audio>
+              <a href="${f.url}" download="${f.name}" class="btn-secondary btn-sm" title="Descargar WAV">⬇️</a>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        stats.innerText = 'Error al cargar los audios del servidor.';
+        container.innerHTML = '<div style="color: var(--rose); padding: 1rem; text-align: center;">No se pudo conectar con el endpoint de archivos.</div>';
+      }
+    };
+
+    window.closeOutputsModal = function() {
+      document.getElementById('modal-outputs').style.display = 'none';
+    };
+
+    // BORRAR TODOS LOS WAV
+    window.deleteAllWavsHtml = async function() {
+      if (!confirm('⚠️ ¿Estás seguro de que deseas BORRAR TODOS los archivos WAV generados?\n\nEsta acción limpiará la carpeta de salida y reseteará las escenas.')) {
+        return;
+      }
+      try {
+        const res = await fetch('/api/delete-all-wavs', { method: 'POST' });
+        const data = await res.json();
+        showToast(`🗑️ ${data.message || 'Archivos eliminados correctamente.'}`);
+        await loadProject();
+        if (document.getElementById('modal-outputs').style.display === 'flex') {
+          openOutputsModal();
+        }
+      } catch (e) {
+        showToast('Error al eliminar los archivos WAV: ' + e);
+      }
+    };
+
+    // DESCARGAR TODOS LOS WAV EN ZIP
+    window.downloadAllZipHtml = function() {
+      showToast('📦 Preparando descarga ZIP...');
+      window.location.href = '/api/download-all-zip';
+    };
+
+    // GENERAR AUDIO PRINCIPAL
+    btnGenerateMain.addEventListener('click', async () => {
+      const text = scriptInput.value.trim();
+      if (!text) {
+        alert('Por favor introduce un guion antes de generar.');
+        return;
+      }
+
+      const payload = {
+        text: text,
+        processing_mode: currentMode,
+        language: langSelect.value,
+        voice_name: voiceSelect.value,
+        exaggeration: parseFloat(document.getElementById('param-exaggeration').value),
+        temperature: parseFloat(document.getElementById('param-temperature').value),
+        cfg_weight: parseFloat(document.getElementById('param-cfg').value),
+        seed: parseInt(document.getElementById('param-seed').value) || 737219296
+      };
+
+      try {
+        btnGenerateMain.disabled = true;
+        btnGenerateMain.innerText = '⏳ INICIANDO PRODUCCIÓN...';
+        btnCancelMain.style.display = 'inline-flex';
+
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          showToast('🚀 Producción iniciada en segundo plano.');
+          startPolling();
+        } else {
+          const err = await res.json();
+          alert('Error: ' + (err.detail || 'No se pudo iniciar'));
+          resetGenerateBtns();
+        }
+      } catch (e) {
+        alert('Error conectando con el backend: ' + e);
+        resetGenerateBtns();
+      }
+    });
+
+    // CANCELAR GENERACIÓN
+    btnCancelMain.addEventListener('click', async () => {
+      try {
+        await fetch('/api/cancel', { method: 'POST' });
+        showToast('🛑 Petición de cancelación enviada.');
+      } catch (e) {}
+    });
+
+    function resetGenerateBtns() {
+      btnGenerateMain.disabled = false;
+      btnGenerateMain.innerText = '🎙️ GENERAR AUDIO';
+      btnCancelMain.style.display = 'none';
+      document.getElementById('progress-container').style.display = 'none';
+    }
+
+    // POLLING DE PROGRESO
+    function startPolling() {
+      if (pollInterval) clearInterval(pollInterval);
+      pollInterval = setInterval(checkProgress, 1200);
+      document.getElementById('progress-container').style.display = 'flex';
+      btnCancelMain.style.display = 'inline-flex';
+      btnGenerateMain.disabled = true;
+      checkProgress();
+    }
+
+    async function checkProgress() {
+      try {
+        const res = await fetch('/api/progress');
+        if (!res.ok) return;
+        const prog = await res.json();
+
+        const fill = document.getElementById('progress-fill');
+        const desc = document.getElementById('progress-step-desc');
+        const pctElem = document.getElementById('progress-step-percent');
+
+        if (prog.is_generating) {
+          btnGenerateMain.innerText = `⏳ GENERANDO (${prog.current_step}/${prog.total_steps})...`;
+          const pct = prog.total_steps > 0 ? Math.round((prog.current_step / prog.total_steps) * 100) : 5;
+          fill.style.width = pct + '%';
+          pctElem.innerText = pct + '%';
+          desc.innerText = prog.message || `Sintetizando: ${prog.current_label}`;
+        } else {
+          clearInterval(pollInterval);
+          pollInterval = null;
+          resetGenerateBtns();
+          loadProject();
+          showToast(prog.message || 'Producción finalizada.');
+        }
+      } catch (e) {}
+    }
+
+    // COLA FIFO DE REGENERACIÓN EN TEMPLATES/INDEX.HTML
+    let htmlPartQueue = [];
+    let isHtmlQueueRunning = false;
+    let activePartKey = null;
+
+    // Encolar parte individual para no cancelar y procesar secuencialmente
+    window.regenerateSingle = function(secNum, partNum) {
+      const key = `${secNum}-${partNum}`;
+      if (activePartKey === key) {
+        showToast(`Escena ${secNum} Parte ${partNum} ya se está regenerando actualmente.`);
+        return;
+      }
+      if (htmlPartQueue.some(q => q.secNum === secNum && q.partNum === partNum)) {
+        showToast(`Escena ${secNum} Parte ${partNum} ya está en la cola de espera.`);
+        return;
+      }
+
+      htmlPartQueue.push({ secNum, partNum });
+      updatePartQueueUI(secNum, partNum, htmlPartQueue.length);
+
+      if (!isHtmlQueueRunning) {
+        processHtmlPartQueue();
+      } else {
+        showToast(`⏳ Escena ${secNum} Parte ${partNum} añadida a la cola (posición #${htmlPartQueue.length}).`);
+      }
+    };
+
+    async function processHtmlPartQueue() {
+      if (isHtmlQueueRunning || htmlPartQueue.length === 0) return;
+      isHtmlQueueRunning = true;
+
+      const item = htmlPartQueue.shift();
+      const secNum = item.secNum;
+      const partNum = item.partNum;
+      activePartKey = `${secNum}-${partNum}`;
+
+      // Feedback visual inmediato en la fila correspondiente
+      const rowElem = document.getElementById(`row-${activePartKey}`);
+      const regenBtn = document.getElementById(`btn-regen-part-${secNum}-${partNum}`);
+      const badgeElem = document.getElementById(`badge-${activePartKey}`);
+
+      if (rowElem) {
+        rowElem.classList.remove('queued-style');
+        rowElem.classList.add('generating-pulse');
+      }
+      if (badgeElem) {
+        badgeElem.style.display = 'inline-flex';
+        badgeElem.style.background = 'rgba(245, 158, 11, 0.2)';
+        badgeElem.style.color = '#f59e0b';
+        badgeElem.style.border = '1px solid rgba(245, 158, 11, 0.5)';
+        badgeElem.innerText = '⏳ Trabajando en regenerar...';
+      }
+      if (regenBtn) {
+        regenBtn.innerText = '⏳ Regenerando...';
+        regenBtn.disabled = true;
+      }
+
+      const secLabel = currentMode === 'scene' ? 'Escena' : 'Párrafo';
+      showToast(`⏳ Trabajando en regenerar ${secLabel} ${secNum} Parte ${partNum}...`);
+
+      const payload = {
+        processing_mode: currentMode,
+        section_number: secNum,
+        part_number: partNum,
+        language: langSelect.value,
+        voice_name: voiceSelect.value,
+        audio_prompt_path: null,
+        exaggeration: parseFloat(document.getElementById('param-exaggeration').value),
+        temperature: parseFloat(document.getElementById('param-temperature').value),
+        cfg_weight: parseFloat(document.getElementById('param-cfg').value),
+        seed: parseInt(document.getElementById('param-seed').value) || 737219296
+      };
+
+      try {
+        const res = await fetch('/api/regenerate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          playAudioChime();
+          showToast(`✅ ¡Listo! ${secLabel} ${secNum} Parte ${partNum} terminada con éxito.`);
+          await loadProject();
+
+          // Highlight temporal de terminado con éxito
+          const finishedRow = document.getElementById(`row-${activePartKey}`);
+          const finishedBadge = document.getElementById(`badge-${activePartKey}`);
+          if (finishedRow) {
+            finishedRow.classList.add('just-finished');
+            setTimeout(() => finishedRow.classList.remove('just-finished'), 6000);
+          }
+          if (finishedBadge) {
+            finishedBadge.style.display = 'inline-flex';
+            finishedBadge.style.background = 'rgba(16, 185, 129, 0.2)';
+            finishedBadge.style.color = '#34d399';
+            finishedBadge.style.border = '1px solid rgba(16, 185, 129, 0.5)';
+            finishedBadge.innerText = '✅ ¡Terminado!';
+            setTimeout(() => { finishedBadge.style.display = 'none'; }, 6000);
+          }
+        } else {
+          const err = await res.json();
+          showToast(`❌ Error: ${err.detail || 'Fallo al regenerar'}`);
+        }
+      } catch (e) {
+        showToast('Error de conexión: ' + e);
+      } finally {
+        isHtmlQueueRunning = false;
+        const finishedKey = activePartKey;
+        activePartKey = null;
+
+        const cleanRow = document.getElementById(`row-${finishedKey}`);
+        if (cleanRow) cleanRow.classList.remove('generating-pulse');
+
+        const cleanBtn = document.getElementById(`btn-regen-part-${secNum}-${partNum}`);
+        if (cleanBtn) {
+          cleanBtn.innerText = '🔄 Regenerar';
+          cleanBtn.disabled = false;
+        }
+
+        if (htmlPartQueue.length > 0) {
+          processHtmlPartQueue();
+        } else {
+          showToast('🎉 Todas las partes en cola han finalizado.');
+        }
+      }
+    }
+
+    function playAudioChime() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.18, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.35);
+      } catch {}
+    }
+
+    function updatePartQueueUI(secNum, partNum, position) {
+      const row = document.getElementById(`row-${secNum}-${partNum}`);
+      const regenBtn = document.getElementById(`btn-regen-part-${secNum}-${partNum}`);
+      const badgeElem = document.getElementById(`badge-${secNum}-${partNum}`);
+
+      if (row) {
+        row.classList.add('queued-style');
+      }
+      if (regenBtn) {
+        regenBtn.innerText = `⏳ En cola (#${position})`;
+        regenBtn.disabled = true;
+      }
+      if (badgeElem) {
+        badgeElem.style.display = 'inline-flex';
+        badgeElem.style.background = 'rgba(6, 182, 212, 0.2)';
+        badgeElem.style.color = '#38bdf8';
+        badgeElem.style.border = '1px solid rgba(6, 182, 212, 0.5)';
+        badgeElem.innerText = `⏳ En cola (#${position})`;
+      }
+    }
+
+    // REGENERAR SELECCIONADAS (SE AGREGAN A LA COLA)
+    btnRegenSelected.addEventListener('click', async () => {
+      if (selectedParts.size === 0) return;
+      const items = Array.from(selectedParts).map(k => {
+        const parts = k.split('-');
+        return [parseInt(parts[0]), parseInt(parts[1])];
+      });
+
+      let added = 0;
+      for (const item of items) {
+        const s = item[0];
+        const p = item[1];
+        const key = `${s}-${p}`;
+        if (activePartKey !== key && !htmlPartQueue.some(q => q.secNum === s && q.partNum === p)) {
+          htmlPartQueue.push({ secNum: s, partNum: p });
+          updatePartQueueUI(s, p, htmlPartQueue.length);
+          added++;
+        }
+      }
+
+      selectedParts.clear();
+      document.getElementById('sel-count').innerText = 0;
+      btnRegenSelected.disabled = true;
+      showToast(`🚀 ${added} partes agregadas a la cola de regeneración.`);
+
+      if (!isHtmlQueueRunning) {
+        processHtmlPartQueue();
+      }
+    });
+
+    // REPRODUCIR AUDIO DE LA ESCENA
+    window.togglePlayScene = function(secNum) {
+      const audio = document.getElementById(`audio-sec-${secNum}`);
+      if (!audio) return;
+
+      // Pausar todos los demás reproductores activos
+      document.querySelectorAll('audio').forEach(a => {
+        if (a !== audio) a.pause();
+      });
+
+      if (audio.paused) {
+        audio.play().catch(err => {
+          showToast('No se pudo reproducir el archivo WAV: ' + err);
+        });
+      } else {
+        audio.pause();
+      }
+    };
+
+    window.updateScenePlayBtn = function(secNum, isPlaying) {
+      const btn = document.getElementById(`btn-play-sec-${secNum}`);
+      if (btn) {
+        btn.innerText = isPlaying ? '⏸️ Pausa' : '▶️ Play';
+        btn.style.background = isPlaying 
+          ? 'linear-gradient(135deg, #0284c7, #06b6d4)' 
+          : 'linear-gradient(135deg, #10b981, #059669)';
+      }
+    };
+
+    // REPRODUCIR AUDIO DE UNA PARTE INDIVIDUAL
+    window.togglePlayPart = function(secNum, partNum) {
+      const audio = document.getElementById(`audio-part-${secNum}-${partNum}`);
+      if (!audio) return;
+
+      // Pausar todos los demás reproductores activos
+      document.querySelectorAll('audio').forEach(a => {
+        if (a !== audio) a.pause();
+      });
+
+      if (audio.paused) {
+        audio.play().catch(err => {
+          showToast('No se pudo reproducir el archivo WAV: ' + err);
+        });
+      } else {
+        audio.pause();
+      }
+    };
+
+    window.updatePartPlayBtn = function(secNum, partNum, isPlaying) {
+      const btn = document.getElementById(`btn-play-part-${secNum}-${partNum}`);
+      if (btn) {
+        btn.innerText = isPlaying ? '⏸️ Pausa' : '▶️ Play';
+        btn.style.background = isPlaying 
+          ? 'linear-gradient(135deg, #0284c7, #06b6d4)' 
+          : 'linear-gradient(135deg, #10b981, #059669)';
+      }
+    };
+
+    // REGENERAR ÚNICAMENTE LA ESCENA SELECCIONADA
+    window.regenerateScene = async function(secNum) {
+      const btn = document.getElementById(`btn-regen-sec-${secNum}`);
+      const originalText = btn ? btn.innerText : '🔄 Regenerar';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Regenerando...';
+      }
+
+      showToast(`🔄 Regenerando ÚNICAMENTE ${currentMode === 'scene' ? 'Escena' : 'Párrafo'} ${secNum}...`);
+
+      const payload = {
+        processing_mode: currentMode,
+        section_number: secNum,
+        language: langSelect.value,
+        voice_name: voiceSelect.value,
+        exaggeration: parseFloat(document.getElementById('param-exaggeration').value),
+        temperature: parseFloat(document.getElementById('param-temperature').value),
+        cfg_weight: parseFloat(document.getElementById('param-cfg').value),
+        seed: parseInt(document.getElementById('param-seed').value) || 737219296
+      };
+
+      try {
+        const res = await fetch('/api/regenerate-section', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          showToast(`✅ ${currentMode === 'scene' ? 'Escena' : 'Párrafo'} ${secNum} regenerada con éxito (${data.filename}).`);
+          await loadProject();
+        } else {
+          const err = await res.json();
+          alert('Error al regenerar escena: ' + (err.detail || err.message));
+        }
+      } catch (e) {
+        alert('Error de conexión: ' + e);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = originalText;
+        }
+      }
+    };
+
+    // UNIR SECCIÓN (🔗 Unir párrafo / 🔗 Unir escena)
+    window.joinSection = async function(secNum) {
+      showToast(`🔗 Concatenando partes de la sección ${secNum}...`);
+      try {
+        const res = await fetch('/api/join-section', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ processing_mode: currentMode, section_number: secNum })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          showToast(`✅ ${data.filename} creado exitosamente.`);
+          loadProject();
+        } else {
+          const err = await res.json();
+          alert('Error al unir sección: ' + err.detail);
+        }
+      } catch (e) {
+        alert('Error de conexión: ' + e);
+      }
+    };
+
+    // UNIR TODO (MASTER WAV)
+    document.getElementById('btn-join-all').addEventListener('click', async () => {
+      showToast('🔗 Concatenando todo el proyecto en Master_Chatterbox_Prime.wav...');
+      try {
+        const res = await fetch('/api/join-all', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ processing_mode: currentMode, section_number: 1 })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const banner = document.getElementById('master-banner');
+          const audioElem = document.getElementById('master-audio');
+          const downloadBtn = document.getElementById('btn-master-download');
+
+          audioElem.src = `${data.audio_url}?t=${Date.now()}`;
+          downloadBtn.href = data.audio_url;
+          banner.style.display = 'flex';
+          audioElem.play().catch(() => {});
+          showToast('🎉 ¡Audio Master completo creado con éxito!');
+        } else {
+          const err = await res.json();
+          alert('Error: ' + err.detail);
+        }
+      } catch (e) {
+        alert('Error: ' + e);
+      }
+    });
+
+    // MARCAS DE TIEMPO PARA YOUTUBE
+    document.getElementById('btn-copy-yt').addEventListener('click', () => {
+      if (!currentProject || !currentProject.panel || currentProject.panel.length === 0) {
+        alert('Genera o carga un guion con escenas/párrafos primero.');
+        return;
+      }
+      let output = "00:00 Introducción\n";
+      let totalSeconds = 0;
+      currentProject.panel.forEach((s, idx) => {
+        if (idx === 0) return;
+        totalSeconds += 32; // Estimación promedio de 32s por sección
+        const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+        const sec = (totalSeconds % 60).toString().padStart(2, '0');
+        output += `${m}:${sec} ${s.title || (currentMode === 'scene' ? 'Escena ' : 'Párrafo ') + s.number}\n`;
+      });
+      navigator.clipboard.writeText(output).then(() => {
+        showToast('📋 Marcas de tiempo de YouTube copiadas al portapapeles.');
+      });
+    });
+
+    document.getElementById('btn-refresh').addEventListener('click', loadProject);
+
+    // INICIALIZACIÓN
+    updateStats();
+    loadVoices();
+    loadProject();
+  </script>
+</body>
+</html>
