@@ -1,130 +1,136 @@
-# Chatterbox Prime — AI Narration Studio
+# Qwen3Prime
 
-Estudio profesional de producción de narraciones con IA para documentales, audiolibros y YouTube.  
-Arquitectura unificada con **un solo servidor (FastAPI)** que sirve la interfaz web moderna, expone la **API REST**, procesa la síntesis de voz con **Chatterbox Multilingual TTS** (clonación de voz en CPU o GPU CUDA) y mantiene **Gradio** como interfaz alternativa.
-
----
-
-## ✨ Características principales
-
-- **División inteligente del guion:** Por escenas (`ESCENA 1 — Título`) o por párrafos.
-- **Síntesis robusta para frases largas:** Segmentación automática por oraciones y recorte de silencios muertos para evitar cortes o pausas largas.
-- **Clonación de voz local:** Sube o guarda muestras `.wav` en `voices/` y úsalas como referencia.
-- **Regeneración flexible:** Regenera partes individuales, lotes seleccionados o escenas completas manteniendo la **semilla fija** (para conservar tono/estilo) o usando **semilla aleatoria**.
-- **Ensamblado y exportación:** Une partes en escenas completas, escucha desde el navegador, explora los archivos generados, borra los `.wav` para reiniciar o descarga todo en un `.zip`.
+Estudio local de narración documental y clonación de voz con interfaz web para **Windows 11**, impulsado por el motor oficial **Qwen3-TTS (`qwen-tts`)** y diseñado para producir locuciones largas (25 a 40+ minutos) de forma estable, recuperable y sin pérdida de calidad.
 
 ---
 
-## 📋 Requisitos previos
+## Características principales
 
-Antes de instalar, asegúrate de tener en tu PC:
-
-1. **Python 3.10 o 3.11** (recomendado para compatibilidad con PyTorch y Chatterbox TTS).
-2. **Git** (opcional, si clonas el repositorio desde terminal).
-3. **Tarjeta gráfica NVIDIA con CUDA** *(opcional pero recomendada)*: funciona también en **CPU**, aunque la generación será más lenta.
-4. **Node.js 18+** *(solo si deseas modificar/compilar el frontend React en `src/`)*. Para usar la aplicación normalmente **no necesitas Node.js**, ya que Python sirve directamente `templates/index.html`.
-
----
-
-## 🚀 Instalación desde cero (Primera vez)
-
-### 1. Descargar el proyecto
-Clona el repositorio o descárgalo como ZIP desde GitHub y descomprímelo:
-
-```bash
-git clone https://github.com/TU_USUARIO/TU_REPOSITORIO.git
-cd TU_REPOSITORIO
-```
-
-### 2. Crear y activar el entorno virtual de Python
-
-**En Windows (CMD o PowerShell):**
-```bash
-python -m venv .venv
-.venv\Scripts\activate
-```
-
-**En Linux / macOS:**
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-### 3. Instalar PyTorch (CPU o GPU NVIDIA)
-Elige **una** de las dos opciones según tu computadora:
-
-- **Si tienes GPU NVIDIA (recomendado, más rápido):**
-  ```bash
-  pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121
-  ```
-- **Si solo usarás CPU:**
-  ```bash
-  pip install torch torchaudio
-  ```
-
-### 4. Instalar dependencias del proyecto y Chatterbox TTS
-```bash
-pip install -r requirements.txt
-```
-*(Si `chatterbox-tts` requiere instalación directa desde su repositorio oficial, puedes instalarlo con `pip install git+https://github.com/resemble-ai/chatterbox.git`).*
-
-> 💡 **Descarga del modelo:** La primera vez que presiones **Generar Audio**, el sistema descargará automáticamente los pesos de **Chatterbox Multilingual TTS** desde Hugging Face. Asegúrate de tener conexión a internet y espacio libre en disco (~3–5 GB).
+- **Clonación de voz 100 % local con Qwen3-TTS:** Compatible con `Qwen/Qwen3-TTS-12Hz-1.7B-Base` (máxima fidelidad) y `Qwen/Qwen3-TTS-12Hz-0.6B-Base` (ligero para CPU), reutilizando el `voice_clone_prompt` cacheado en memoria y disco (`voices/prompt_cache/`).
+- **Soporte para los 10 idiomas nativos de Qwen3-TTS** (Español por defecto, Inglés, Portugués, Francés, Italiano, Alemán, Ruso, Japonés, Coreano y Chino).
+- **Segmentación por Escenas o Párrafos:** Detecta encabezados (`ESCENA 1 — INTRODUCCIÓN`, etc.) o divide por párrafos respetando oraciones y palabras completas sin cortes bruscos.
+- **Normalización inteligente para español:** Convierte internamente números, años, decimales, porcentajes y divisas antes de sintetizar sin modificar el texto visible de tu guion.
+- **Recuperación exacta por hash SHA-256:** Cada segmento guarda su estado en disco tras generarse; si ocurre un corte o editas una frase, solo se marcan como *Desactualizadas* las partes afectadas y puedes reanudar desde la primera pendiente.
+- **Limpieza automática de artefactos ICL:** Acondiciona una copia temporal del audio de referencia (sin modificar nunca el `.wav` original) y elimina ecos/sílabas iniciales aisladas antes de ensamblar.
+- **Ensamblado sin pérdida y exportación de escenas completas:** Une automáticamente cada escena o párrafo en `.wav` PCM 16-bit con pausas configurables, genera el **Master WAV** completo y exporta un `.zip` con las escenas completas + master + guion.
+- **Múltiples proyectos independientes:** Cada vídeo vive aislado en su carpeta dentro de `projects/<id>/`.
+- **Arranque local seguro y tolerante a puertos ocupados:** Corre únicamente en `127.0.0.1` y, si el puerto `8000` está ocupado (`WinError 10048`), selecciona automáticamente el siguiente puerto libre (`8001`–`8019`).
 
 ---
 
-## 🎙️ Configurar voces de referencia
+## Requisitos del sistema
 
-1. Coloca tus archivos de voz de referencia (`.wav` limpio de 5 a 15 segundos) dentro de la carpeta `voices/`.
-2. Si agregas el archivo `voices/Brian Warm Clonacion Voz.wav`, el sistema lo detectará automáticamente como voz predeterminada.
-3. También puedes subir o eliminar voces directamente desde la interfaz web con el botón **Administrar Voces**.
+- **Sistema operativo:** Windows 11 (64 bits).
+- **Python:** **Python 3.12** (64 bits, recomendado; compatible con 3.10–3.12).
+- **Almacenamiento libre:** Al menos **10–15 GB** recomendados para `.venv`, caché de Hugging Face y archivos WAV.
+- **Node.js (opcional):** Solo necesario si deseas modificar/recompilar la interfaz React/Vite; el instalador la compila automáticamente si `dist/` no existe y `npm` está disponible.
+- **Internet:** Solo necesario durante la instalación y la primera descarga automática de los modelos Qwen3-TTS desde Hugging Face.
+
+### Perfiles de hardware recomendados
+
+| Perfil de hardware | Modo PyTorch | Precisión / Atención | Modelo recomendado |
+| :--- | :--- | :--- | :--- |
+| **Sin GPU dedicada (ej. Ryzen 5 5600G, 16 GB RAM)** | CPU | `float32` + `sdpa` | **`Qwen/Qwen3-TTS-12Hz-0.6B-Base`** (más ágil en CPU; `1.7B-Base` funciona pero es más lento) |
+| **GPU NVIDIA CUDA (ej. RTX 30xx / 40xx / 5060)** | CUDA (`cu128`) | `bfloat16` + `sdpa` / `flash_attention_2` | **`Qwen/Qwen3-TTS-12Hz-1.7B-Base`** (máxima fidelidad y velocidad en GPU) |
 
 ---
 
-## ▶️ Cómo iniciar la aplicación
+## Instalación rápida (Windows 11)
 
-### Opción A: Un solo clic en Windows
-Haz doble clic en el lanzador incluido en la carpeta raíz:
+1. Clona este repositorio o descárgalo como ZIP:
+   ```bat
+   git clone <URL_DE_TU_REPOSITORIO>
+   cd Qwen3Prime
+   ```
+2. Haz doble clic en **`install.bat`**:
+   - Detecta automáticamente Python 3.12 (o te ofrece instalarlo con `py install 3.12`).
+   - Crea el entorno virtual aislado en `.venv\`.
+   - Detecta si tienes GPU NVIDIA (`nvidia-smi`) para instalar PyTorch con **CUDA 12.8** o versión **CPU**.
+   - Instala `qwen-tts`, `FastAPI`, `Uvicorn`, `soundfile`, `numpy`, `scipy` y `psutil`.
+   - Compila el frontend en `dist\` si aún no existe y `npm` está disponible.
+3. Coloca tu archivo de voz de referencia `.wav` (3–15 s, limpio, sin música) dentro de `voices\` (o súbelo desde la pestaña **Biblioteca de Voces**).
+
+---
+
+## Uso diario
+
+Haz doble clic en **`Iniciar_Qwen3Prime.bat`**.
+
+El servidor iniciará en `http://127.0.0.1:8000` (o en el siguiente puerto libre si el `8000` ya estuviera en uso) y abrirá automáticamente tu navegador.
+
+### Flujo de trabajo recomendado
+
+1. **Biblioteca de Voces:**
+   - Selecciona o sube tu archivo `.wav` (el archivo original nunca se modifica).
+   - Escribe la **transcripción exacta (`ref_text`)** terminada en punto final y pulsa **Preparar y guardar prompt** (modo ICL de alta fidelidad).
+   - Si no tienes transcripción o prefieres evitar cualquier posible eco inicial ICL, activa **Solo x-vector** (`x_vector_only_mode`).
+2. **Editor de Guiones:**
+   - Pega tu guion en **Modo Escenas** (`ESCENA 1 — ...`) o **Modo Párrafos** y ajusta la longitud objetivo por parte (por defecto `250` caracteres).
+3. **Configuración Qwen3:**
+   - Elige el modelo (`1.7B-Base` o `0.6B-Base`), dispositivo (`auto`, `cpu`, `cuda`), idioma, semilla, limpieza de artefacto inicial y pausas entre oraciones/partes/escenas.
+4. **Producción de Audio:**
+   - Pulsa **Generar Narración** (o **Continuar desde 1ª pendiente** tras cualquier pausa o edición).
+   - Al completarse una escena se ensambla automáticamente para descargar la **Escena Completa (.wav)** directamente.
+5. **Reproductor y Exportación Master:**
+   - Ensambla y descarga el **Master WAV**, copia las marcas de tiempo para YouTube o exporta un **`.zip`** con todas las escenas completas y el Master.
+
+---
+
+## Estructura del proyecto
+
 ```text
-Iniciar_Chatterbox_Prime.bat
+Qwen3Prime/
+├── backend/
+│   ├── api/                # Endpoints REST (estado, voces, proyectos, producción, exportación)
+│   ├── core/               # Segmentador, normalizador ES, hashing SHA-256, runner y proyectos
+│   ├── engine/             # Carga Qwen3-TTS, clonación/caché de prompts y procesador WAV
+│   ├── config.py           # Rutas, hardware, modelos soportados y selección de puerto libre
+│   └── main.py             # Servidor FastAPI + archivos estáticos del frontend
+├── src/                    # Interfaz web React + TypeScript + Tailwind CSS (Vite)
+├── tests/                  # Pruebas unitarias en Python (unittest)
+├── voices/                 # Carpeta local para archivos .wav de referencia (ignorados en Git)
+├── install.bat             # Instalador independiente para Windows 11 (.venv + PyTorch + qwen-tts)
+├── Iniciar_Qwen3Prime.bat  # Lanzador local en Windows 11
+├── requirements.txt        # Dependencias Python
+├── package.json            # Scripts y dependencias del frontend
+└── README.md
 ```
-*(También puedes usar `Iniciar_Cronicas_Mundiales.bat` o `Iniciar_Cronicas_Mundiales.ps1`).*
-
-El script detectará automáticamente tu entorno `.venv`, levantará el servidor en el puerto `8000` y te indicará la dirección para abrir en tu navegador:
-- **Interfaz principal:** `http://localhost:8000`
-- **Interfaz alternativa (Gradio):** `http://localhost:8000/gradio`
-
-### Opción B: Desde la terminal (Windows / Linux / macOS)
-Con tu entorno `.venv` activado:
-```bash
-python multilingual_app.py --port 8000
-```
-*Opciones adicionales:*
-- Solo Gradio: `python multilingual_app.py --gradio-only`
-- Sin abrir el navegador automáticamente: `python multilingual_app.py --no-browser`
 
 ---
 
-## 💻 Modo Desarrollo (Opcional — Solo si modificas `src/`)
+## Desarrollo del frontend (opcional)
 
-El proyecto incluye además una interfaz fuente en React + Vite + TypeScript dentro de `src/`. Si deseas editarla y compilarla hacia `dist/`:
+Si deseas editar la interfaz en `src/`:
 
 ```bash
 npm install
-npm run dev     # Servidor de desarrollo en http://localhost:3000
-npm run build   # Compila la versión de producción en dist/
+npm run dev       # Servidor de desarrollo Vite en http://127.0.0.1:3000
+npm run lint      # Verificación de tipos TypeScript (tsc --noEmit)
+npm run build     # Compila el frontend en dist/
 ```
 
 ---
 
-## 📡 Endpoints principales de la API REST
+## Pruebas automatizadas
 
-- `GET /api/status` — Estado del motor, dispositivo (`CPU`/`CUDA`) y carga del modelo.
-- `GET /api/progress` — Progreso en tiempo real de la generación.
-- `GET /api/voices`, `POST /api/voices/upload`, `DELETE /api/voices/{name}` — Gestión de voces en `voices/`.
-- `GET /api/languages` — Idiomas soportados por Chatterbox.
-- `GET /api/project`, `POST /api/project` — Carga y guardado del guion y parámetros en `outputs/project.json`.
-- `POST /api/generate` — Inicia la producción secuencial en segundo plano.
-- `POST /api/regenerate`, `POST /api/regenerate-section`, `POST /api/regenerate-batch` — Regeneración con soporte de `keep_seed`.
-- `POST /api/join`, `POST /api/join-all` — Unión de partes por escena o master completo.
-- `GET /api/outputs`, `POST /api/delete-all-wavs`, `GET /api/download-all-zip` — Explorador, limpieza y descarga ZIP de los `.wav`.
+Desde la raíz del proyecto:
 
+```bat
+.venv\Scripts\python.exe -m unittest discover -s tests -v
+```
+
+En Linux/macOS:
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+---
+
+## Solución de problemas frecuentes
+
+- **Error `[WinError 10048]` / Puerto 8000 ocupado:** Ocurre cuando quedó otra ventana previa del servidor abierta. `Qwen3Prime` detecta automáticamente el puerto ocupado y arranca en el siguiente disponible (`8001`, `8002`, etc.), o puedes cerrar las ventanas anteriores de Python.
+- **El audio inicia con una sílaba residual (modo ICL):** Mantén activa la opción **Limpiar sílaba o eco inicial** en *Configuración Qwen3*, pulsa **Regenerar prompt** en *Biblioteca de Voces* y verifica que `ref_text` coincida exactamente con el audio y termine con punto final; como alternativa inmediata, activa **Solo x-vector** en la voz.
+- **El navegador muestra servidor desconectado:** Verifica que la ventana de consola de `Iniciar_Qwen3Prime.bat` siga abierta sin errores.
+- **Poca RAM disponible en CPU (16 GB) con el modelo 1.7B:** Usa el botón **Liberar memoria** en el Panel Principal o selecciona **`Qwen/Qwen3-TTS-12Hz-0.6B-Base`** para trabajar con mayor fluidez en CPU.
+- **Error de descarga de Hugging Face:** Comprueba tu conexión a Internet la primera vez que cargas el modelo; una vez guardado en `%USERPROFILE%\.cache\huggingface`, funcionará sin conexión.

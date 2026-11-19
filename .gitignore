@@ -1,35 +1,71 @@
+# ==============================================================================
+# Qwen3Prime — .gitignore para GitHub
+# ==============================================================================
+
 # Entornos virtuales de Python
 .venv/
 venv/
 env/
 ENV/
 
-# Caché de Python
+# Caché y compilados de Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.egg-info/
+.eggs/
+build/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
 # Node.js / Vite Frontend
 node_modules/
-dist/
 .vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Archivos generados por el usuario (audios WAV, proyectos locales, ZIPs)
+# Frontend compilado (dist/):
+# Se mantiene incluido por defecto para que Windows 11 pueda ejecutar el estudio
+# solo con Python sin requerir Node.js. Descomenta la siguiente línea si prefieres
+# no subir dist/ a GitHub y compilar localmente con `npm run build`.
+# dist/
+
+# Datos locales de proyectos, audios generados y exportaciones (pueden pesar cientos de MB)
+projects/
 outputs/
 *.zip
+*.tmp
 
-# Archivos de sistema y editores
+# Voces clonadas privadas y caché de prompts Qwen3-TTS (conserva voices/COLOCA_AQUI_TU_VOZ.txt)
+voices/*.wav
+voices/*.mp3
+voices/*.flac
+voices/*.ogg
+voices/voices_manifest.json
+voices/prompt_cache/
+
+# Pesos y cachés de modelos IA (por si se descargan dentro del repositorio)
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+.cache/
+
+# Variables de entorno locales y secretos
+.env
+.env.*
+!.env.example
+
+# Archivos temporales del sistema operativo y editores
 .DS_Store
 Thumbs.db
+desktop.ini
+*.log
 .vscode/
 .idea/
-*.log
-
-# Variables de entorno locales (secretos)
-.env
-.env.local
-
-# Descomenta la siguiente línea si NO quieres subir tus archivos .wav de voces clonadas a GitHub
-# voices/*.wav
+*.swp
+*.swo

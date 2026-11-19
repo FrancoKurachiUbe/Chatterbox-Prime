@@ -1,0 +1,11 @@
+Coloca aquí (sin modificar el original) tu archivo de voz de referencia:
+
+  Brian Warm Clonacion Voz.wav
+
+También puedes importar nuevas voces WAV directamente desde la pestaña
+"Biblioteca de Voces" de la aplicación.
+
+Recomendación para máxima fidelidad con Qwen3-TTS:
+- Audio limpio, sin música de fondo ni eco, en formato WAV.
+- Introduce la transcripción exacta de lo que dices en el audio desde
+  la pestaña "Biblioteca de Voces" para preparar y guardar el prompt de clonación.
